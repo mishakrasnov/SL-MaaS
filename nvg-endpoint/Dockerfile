@@ -4,19 +4,13 @@ FROM python:3.10
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Copy requirements file
-COPY requirements.txt .
-
-# Install dependencies from requirements.txt
-RUN pip install -r requirements.txt
+# Install any needed packages specified in requirements.txt
+RUN pip install fastapi uvicorn python-multipart
+RUN pip install numpy torch_geometric torch
+RUN pip install gdown
 
 ADD . /app
-
-
-# For ARM architecture (e.g., Raspberry Pi): switch to the appropriate wheel file
-RUN pip install ts2vg==1.2.3
-# RUN pip install ts2vg-1.2.3-cp310-cp310-linux_aarch64.whl
-
+RUN pip install ts2vg-1.2.3-cp310-cp310-linux_aarch64.whl
 EXPOSE 8000
 
 # Run app.py when the container launches

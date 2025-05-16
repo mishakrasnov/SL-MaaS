@@ -1,7 +1,6 @@
 from typing import List, Tuple
 import requests
 from concurrent.futures import ThreadPoolExecutor
-import pickle
 import numpy as np
 from typing import List, Tuple, Union, Dict
 
@@ -12,42 +11,12 @@ import math
 import numpy as np
 import h5py
 
-from pathlib import Path
 
-Size = Union[int, Tuple[int, int]]
 
-Padding = Union[int, Tuple[int, int], Tuple[int, int, int, int]]
-
-DATASET_PATH = "dataset_path.h5"
+DATASET_PATH = "data_reduced.h5"
 IMG_SIZE=128
 IMG_STRIDE=128
 LIMIT_IMAGES=100_000
-
-
-# Functions
-def make_request(url: str, data: List) -> Tuple[float, any]:
-    response = requests.post(url, json=data)
-    rtt = response.elapsed.total_seconds()
-
-    if response.status_code != 200:
-        print(f'Error: {response.status_code}')
-
-    if not response.json()['pred']:
-        print('Error: Response is empty')
-
-    return rtt, response.json()["pred"]
-
-
-def test_api_parallel(url: str, num_requests: int, data: List) -> Tuple[List[float], List[any]]:
-    with ThreadPoolExecutor(max_workers=num_requests) as executor:
-        latencies_responses = list(executor.map(lambda _: make_request(url, data), range(num_requests)))
-
-    latencies = [latency for latency, _ in latencies_responses]
-    responses = [response for _, response in latencies_responses]
-    return latencies, responses
-
-
-# Data-related classes
 
 class BaseSignalDataset(object):
     # Global dataset constants
@@ -164,8 +133,7 @@ class BaseSignalDataset(object):
                 raw_data = np.pad(raw_data, pad, mode="constant", constant_values=self.RSS_MAX)
 
             return raw_data
-
-
+        
 class SignalDatasetV2(data.Dataset):
     def __init__(self, window:Size, stride:Size, labels=[], limit=None,
     dataset_path:Union[Path, str]=DATASET_PATH, three_channels=False) -> None:
@@ -213,25 +181,17 @@ class SignalDatasetV2(data.Dataset):
         return image, label
 
 
-# Data loader
 raw_dataset = SignalDatasetV2(window=IMG_SIZE, stride=IMG_STRIDE,
                               limit=LIMIT_IMAGES, dataset_path=DATASET_PATH, three_channels=False)
 
-# TODO: 
-# 1. Resolve the data format
-# 2. Save model in proper location.
-# 3. Adapt the rest of the code accordingly.
-# 4. Test the whole pipeline.
+data_t = np.expand_dims(raw_dataset[0][0], axis=0).tolist()
 
-# Args (Select model and url)
-model_names = ['ResNet18', 'VGG']
-model_name = model_names[0]
-print(model_name)
 
-url = f"http://193.2.205.27:31228/{model_name}"
-parallel_requests = 1000
-# warmup
-print(f'Running warmup for {model_name} with {parallel_requests} requests')
-data_t = np.expand_dims(data_all[0], axis=0)
-_, _ = test_api_parallel(url, parallel_requests, data_t.tolist())
-print('Done')
+import time
+
+def test_nvg_endpoint():
+    # Wait for the container to be ready
+    time.sleep(3)
+
+    response = requests.post("http://localhost:8000/NVG", json=data_t)
+    assert response.status_code == 200

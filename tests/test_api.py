@@ -1,14 +1,11 @@
-from typing import List, Tuple
 import requests
-from concurrent.futures import ThreadPoolExecutor
 import numpy as np
-from typing import List, Tuple, Union, Dict, Path
+from typing import List, Tuple, Union, Dict
 import os
 import torch
 from torch.utils import data
 from torchvision import transforms as T
 import math
-import numpy as np
 import h5py
 
 
@@ -16,7 +13,7 @@ import h5py
 DATASET_PATH = "data_reduced.h5"
 IMG_SIZE=128
 IMG_STRIDE=128
-LIMIT_IMAGES=100_000
+LIMIT_IMAGES=0
 
 class BaseSignalDataset(object):
     # Global dataset constants
@@ -45,9 +42,7 @@ class BaseSignalDataset(object):
         assert self.stride[0] != 0 and self.stride[1] != 0
 
         # Open pointer to HDF5 file
-        resolved_path = Path(dataset_path).resolve()
-        assert resolved_path.exists()
-        self.filename = str(resolved_path)
+        self.filename = dataset_path
         with h5py.File(self.filename, mode="r", swmr=True) as fp:
             #self.fp = h5py.File(self.filename, mode="r", swmr=True)
             #Obtain max time range and max bandwidth range
@@ -135,8 +130,8 @@ class BaseSignalDataset(object):
             return raw_data
         
 class SignalDatasetV2(data.Dataset):
-    def __init__(self, window:Size, stride:Size, labels=[], limit=None,
-    dataset_path:Union[Path, str]=DATASET_PATH, three_channels=False) -> None:
+    def __init__(self, window:int, stride:int, labels=[], limit=None,
+    dataset_path:Union[os.PathLike, str]=DATASET_PATH, three_channels=False) -> None:
         super().__init__()
         self.dataset = BaseSignalDataset(window, stride, dataset_path, verbose=False)
         self.labels = labels

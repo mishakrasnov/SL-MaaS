@@ -1,18 +1,17 @@
 from typing import List
 from fastapi import FastAPI
 import torch
+import torch.nn.functional as F
+from torch.nn import Linear, Sequential, BatchNorm1d, ReLU, Dropout, CrossEntropyLoss
+import numpy as np
+from ts2vg import NaturalVG
+
+# PyTorch Geometric imports
+import torch_geometric
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
-from ts2vg import NaturalVG
-import numpy as np
-
-import torch
-import torch.nn.functional as F
-from torch.nn import Linear, CrossEntropyLoss
-from torch_geometric.nn import GCNConv, global_mean_pool, global_add_pool, global_max_pool, ChebConv, global_sort_pool
-from torch.nn import Linear, Sequential, BatchNorm1d, ReLU, Dropout
-import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GINConv, GINEConv, GATv2Conv
+from torch_geometric.nn import global_mean_pool, global_add_pool, global_max_pool, ChebConv, global_sort_pool
 
 
 class GINE(torch.nn.Module):

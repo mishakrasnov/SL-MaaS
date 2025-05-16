@@ -179,7 +179,7 @@ class SignalDatasetV2(data.Dataset):
 raw_dataset = SignalDatasetV2(window=IMG_SIZE, stride=IMG_STRIDE,
                               limit=LIMIT_IMAGES, dataset_path=DATASET_PATH, three_channels=False)
 
-data_t = np.expand_dims(raw_dataset[0][0], axis=0).tolist()
+data_t = torch.tensor(np.expand_dims(raw_dataset[0][0], axis=0))
 
 
 import time

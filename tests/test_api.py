@@ -2,8 +2,8 @@ from typing import List, Tuple
 import requests
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
-from typing import List, Tuple, Union, Dict
-
+from typing import List, Tuple, Union, Dict, Path
+import os
 import torch
 from torch.utils import data
 from torchvision import transforms as T
@@ -28,7 +28,7 @@ class BaseSignalDataset(object):
     __time_first__ = False
 
 
-    def __init__(self, window:Size, stride:Size, dataset_path:Union[Path, str]=DATASET_PATH, verbose:bool=False) -> None:
+    def __init__(self, window:int, stride:int, dataset_path:Union[os.PathLike, str]=DATASET_PATH, verbose:bool=False) -> None:
         super().__init__()
 
         # Verbosity for debugging

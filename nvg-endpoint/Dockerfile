@@ -7,7 +7,6 @@ WORKDIR /app
 # Install any needed packages specified in requirements.txt
 RUN pip install fastapi uvicorn python-multipart
 RUN pip install numpy torch_geometric torch
-RUN pip install gdown
 
 ADD . /app
 # For ARM architecture (e.g., Raspberry Pi): switch to the appropriate wheel file

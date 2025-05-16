@@ -186,7 +186,7 @@ import time
 
 def test_nvg_endpoint():
     # Wait for the container to be ready
-    time.sleep(3)
+    time.sleep(10)
 
     response = requests.post("http://localhost:8000/NVG", json=data_t)
     assert response.status_code == 200

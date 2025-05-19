@@ -1,9 +1,12 @@
-from typing import List, Tuple
 import requests
 from concurrent.futures import ThreadPoolExecutor
-import pickle
-import numpy as np
+from typing import List, Tuple
+from tests.datasets import SignalDatasetV2
 
+DATASET_PATH = "dataset_path.h5"
+IMG_SIZE=128
+IMG_STRIDE=128
+LIMIT_IMAGES=0
 
 # Functions
 def make_request(url: str, data: List) -> Tuple[float, any]:
@@ -28,25 +31,33 @@ def test_api_parallel(url: str, num_requests: int, data: List) -> Tuple[List[flo
     return latencies, responses
 
 
-# Data
-data_url = 'nvg_inference_data.pkl'
-# labels = ["Normal", "SlowD", "SuddenD", "SuddenR", "InstaD"] 
+# Data loader
+raw_dataset = SignalDatasetV2(window=IMG_SIZE, stride=IMG_STRIDE,
+                              limit=LIMIT_IMAGES, dataset_path=DATASET_PATH, three_channels=False)
 
-with open(data_url, 'rb') as f:
-    data_all = pickle.load(f)
+# Dataset to list of lists
+data_t = [
+    [
+        [
+            [
+                float(data_t[i, j, k, m][0]) for m in len(raw_dataset[0][0].shape[2])
+            ]
+            for k in len(raw_dataset[0][0].shape[1])
+        ]
+        for j in len(raw_dataset[0][0].shape[0])
+    ]
+    for i in range(len(raw_dataset))
+]
 
-ip = 'localhost'
-endpoint_route = "NVG"
-port = 8000
+# Args (Select model and url)
+model_names = ['ResNet18']
+model_name = model_names[0]
 
-url = f"http://{ip}:{port}/{endpoint_route}" # change the port if running on kubernetes
-
-parallel_requests = 100
-
-# For larger amount of parallel requests set open files limit to: ulimit -n 500000
-
+url = f"http://193.2.205.27:31228/{model_name}"
+parallel_requests = 1000
 # warmup
-print(f'Running warmup for /{endpoint_route} with {parallel_requests} requests')
-data_t = np.expand_dims(data_all[0], axis=0)
-_, _ = test_api_parallel(url, parallel_requests, data_t.tolist())
+
+print(f'Running warmup for {model_name} with {parallel_requests} requests')
+
+_, _ = test_api_parallel(url, parallel_requests, data_t)
 print('Done')

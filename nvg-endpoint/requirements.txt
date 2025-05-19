@@ -7,5 +7,4 @@ gdown
 
 # For the model
 torch==2.4.1
-torch-geometric==2.6.1
 torchvision

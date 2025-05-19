@@ -4,7 +4,6 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import gdown
-
 import torchvision.models as models
 
 model = models.resnet18(num_classes=24)
@@ -18,9 +17,12 @@ model.eval()
 
 app = FastAPI()
 
-@app.post("/NVG")
+@app.post("/ResNet18")
 async def echo(data: List[List[List[List[float]]]]):
-    data = torch.tensor(data)
-    out = model(data)
-    pred = out.argmax(dim=1)
-    return {"pred": str(pred)}
+    preds = []
+    for i in range(len(data)):
+        cur_data = torch.tensor([data[i]])
+        out = model(cur_data)
+        pred = out.argmax(dim=1)
+        preds.append(str(pred))
+    return {"preds": preds}

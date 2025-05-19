@@ -179,8 +179,8 @@ class SignalDatasetV2(data.Dataset):
 raw_dataset = SignalDatasetV2(window=IMG_SIZE, stride=IMG_STRIDE,
                               limit=LIMIT_IMAGES, dataset_path=DATASET_PATH, three_channels=False)
 
-data_t = [list(raw_dataset[0][0])]
-
+data_t = raw_dataset[0][0]
+data_t = [ [ [float(data_t[i,j]) for j in range(data_t.shape[1])] for i in range(data_t.shape[0]) ] ]
 
 import time
 
